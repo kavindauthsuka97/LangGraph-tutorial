@@ -1,1 +1,94 @@
+You have 4 main Python files:
+
+## 1. `agent_reason_runnable.py`
+
+This file builds the **agent brain**.
+
+It does these things:
+
+```text
+- Loads API keys from .env
+- Creates the Groq LLM
+- Creates your custom time tool
+- Creates the Tavily search tool
+- Pulls the ReAct prompt from LangChain Hub
+- Combines the LLM + tools + prompt into react_agent_runnable
+```
+
+So this file is responsible for deciding **what the agent can think with and what tools it can use**.
+
+---
+
+## 2. `react_state.py`
+
+This file defines the **state structure** for LangGraph.
+
+It says your graph will track:
+
+```text
+input              → the user question
+agent_outcome      → the agent’s latest decision or final answer
+intermediate_steps → tool calls and tool results
+```
+
+This is like the agent’s memory while the graph is running.
+
+---
+
+## 3. `nodes.py`
+
+This file defines the **graph steps**.
+
+It has two main functions:
+
+### `reason_node`
+
+```text
+Runs the agent and asks:
+“What should I do next?”
+```
+
+The agent may decide:
+
+```text
+- use a tool
+- or finish with a final answer
+```
+
+### `act_node`
+
+```text
+Executes the tool chosen by the agent
+```
+
+For example, if the agent chooses Tavily search, this node runs Tavily and saves the result.
+
+---
+
+## 4. `react_graph.py`
+
+This file builds and runs the **LangGraph workflow**.
+
+It does this:
+
+```text
+Start → reason_node → decide:
+                    → if final answer, END
+                    → if tool needed, go to act_node
+act_node → back to reason_node
+```
+
+So the loop is:
+
+```text
+Think → Act → Think → Act → Finish
+```
+
+This file also contains your test input:
+
+```python
+"How many days ago was the latest SpaceX launch?"
+```
+
+and prints the final result.
 
